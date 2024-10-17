@@ -63,7 +63,32 @@ def turtle(s, angle, heading=0.0, draw="FG"):
     return np.array(segments)
 
 
+def draw(ax, segments, cmap):
+    lc = LineCollection(segments, array=np.arange(len(segments)), cmap=cmap, linewidths=0.8)
+    ax.add_collection(lc)
+    ax.autoscale()
+    ax.set_aspect("equal")
+    ax.axis("off")
 
 
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--out", default="gallery.png")
+    args = ap.parse_args()
+
+    rng = random.Random(args.seed)
+    fig, axes = plt.subplots(2, 3, figsize=(13, 9))
+    for ax, (name, p) in zip(axes.flat, PRESETS.items()):
+        s = rewrite(p["axiom"], p["rules"], p["n"], rng)
+        segments = turtle(s, p["angle"], p.get("heading", 0.0))
+        draw(ax, segments, p["cmap"])
+        ax.set_title(f"{name} (n={p['n']}, {len(segments)} segments)", fontsize=10)
+        print(f"{name:<20} n={p['n']:<3} {len(s):>7} chars {len(segments):>6} segments")
+    fig.tight_layout()
+    fig.savefig(args.out, dpi=130)
+    print(f"saved {args.out}")
 
 
+if __name__ == "__main__":
+    main()
